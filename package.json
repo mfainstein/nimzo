@@ -1,0 +1,46 @@
+{
+  "name": "nimzo",
+  "version": "1.0.0",
+  "description": "A minimalistic, distraction free, IDE focused system for the Engineering Manager.",
+  "main": "Main.js",
+  "scripts": {
+    "compile": "tsc -p .",
+    "test": "test",
+    "start": "node ./dist/Main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mfainstein/nimzo.git"
+  },
+  "keywords": [
+    "manager",
+    "managing",
+    "system",
+    "engineering",
+    "ide",
+    "tool",
+    "minimal",
+    "minimalistic",
+    "framework",
+    "organization"
+  ],
+  "author": "Mark Fainstein",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mfainstein/nimzo/issues"
+  },
+  "homepage": "https://github.com/mfainstein/nimzo#readme",
+  "devDependencies": {
+    "typescript": "^4.4.4"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^8.3.0",
+    "conf": "^10.0.3",
+    "jest": "^27.3.1",
+    "plop": "^2.7.6"
+  },
+  "bin": {
+    "nz": "./dist/Main.js"
+  }
+}
