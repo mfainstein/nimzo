@@ -5,7 +5,8 @@
   "main": "Main.js",
   "scripts": {
     "compile": "tsc -p .",
-    "test": "test",
+    "test": "jest",
+    "testAndWatch": "tap --ts --test-ignore=dist/ --node-arg=--require=ts-node/register --watch",
     "start": "node ./dist/Main.js"
   },
   "repository": {
@@ -31,13 +32,23 @@
   },
   "homepage": "https://github.com/mfainstein/nimzo#readme",
   "devDependencies": {
+    "@babel/preset-env": "^7.16.0",
+    "@babel/preset-typescript": "^7.16.0",
+    "@types/configstore": "^5.0.1",
+    "@types/jest": "^27.0.2",
+    "@types/tap": "^15.0.5",
+    "babel-jest": "^27.3.1",
+    "jest": "^27.3.1",
+    "tap": "^15.0.10",
+    "ts-jest": "^27.0.7",
+    "ts-node": "^10.4.0",
     "typescript": "^4.4.4"
   },
   "dependencies": {
     "chalk": "^4.1.2",
     "commander": "^8.3.0",
     "conf": "^10.0.3",
-    "jest": "^27.3.1",
+    "configstore": "^6.0.0",
     "plop": "^2.7.6"
   },
   "bin": {

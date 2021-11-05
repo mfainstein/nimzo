@@ -1,6 +1,24 @@
-Commander
-Plop (Programmatic)
+Commander (V)
+Plop (Programmatic) (V)
+Tests (Jest) (V)
+Uninstall tap, configstore (V)
 
-Tokenize
-Parse
-Save metadata
+Config (Bootstrapper)
+1. Create directories if needed
+2. register cron?
+3. Git?
+4. Text Editor?
+
+Cron scheduler for:
+1. git push/pull
+2. delete/archive
+3. indexing?
+
+Viewer:
+1. Site?
+2. Terminal Ink (react)? (X)
+
+File parser?
+1. Tokenize
+2. Parse
+3. Save metadata

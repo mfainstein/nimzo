@@ -1,6 +1,7 @@
 const {exec} = require('child_process');
 module.exports = function (plop) {
     // ========================================= Helpers =================================================================
+    plop.addHelper('projectPath', (p) => process.cwd());
     plop.setHelper('dottedFormat', (text) => {
         let parts = text.split(" ");
         return parts.join(".");
@@ -21,7 +22,7 @@ module.exports = function (plop) {
     });
     plop.setHelper('tomorrowUnixTime', () => {
         let date = new Date();
-        date.setDate(date.getDate()+1);
+        date.setDate(date.getDate() + 1);
         date.setHours(0, 0, 0);
         date.setMilliseconds(0);
         return date.getTime();
@@ -63,11 +64,11 @@ module.exports = function (plop) {
             {
                 type: 'add',
                 path: 'meetings/{{hyphenFormat attendants}}.{{shortDate}}.meeting',
-                templateFile: 'templates/meeting.hbs',
+                templateFile: 'src/scaffolding/templates/meeting.hbs',
             },
             {
                 type: 'append',
-                templateFile: 'templates/data/meeting.hbs',
+                templateFile: 'src/scaffolding/templates/data/meeting.hbs',
                 pattern: /},(?!\n\s+{)/g,
                 path: 'data.js',
             },
@@ -88,11 +89,11 @@ module.exports = function (plop) {
             {
                 type: 'add',
                 path: 'plans/{{unixTime}}.plan.md',
-                templateFile: 'templates/plan.hbs',
+                templateFile: 'src/scaffolding/templates/plan.hbs',
             },
             {
                 type: 'append',
-                templateFile: 'templates/data/plan.hbs',
+                templateFile: 'src/scaffolding/templates/data/plan.hbs',
                 pattern: /},(?!\n\s+{)/g,
                 path: 'data.js',
             },
@@ -112,11 +113,11 @@ module.exports = function (plop) {
             {
                 type: 'add',
                 path: 'plans/{{tomorrowUnixTime}}.plan.md',
-                templateFile: 'templates/plan.hbs',
+                templateFile: 'src/scaffolding/templates/plan.hbs',
             },
             {
                 type: 'append',
-                templateFile: 'templates/data/plan.hbs',
+                templateFile: 'src/scaffolding/templates/data/plan.hbs',
                 pattern: /},(?!\n\s+{)/g,
                 path: 'data.js',
             },
@@ -142,11 +143,11 @@ module.exports = function (plop) {
             {
                 type: 'add',
                 path: '1on1/{{associate}}.{{shortDate}}.1on1',
-                templateFile: 'templates/1on1.hbs',
+                templateFile: 'src/scaffolding/templates/1on1.hbs',
             },
             {
                 type: 'append',
-                templateFile: 'templates/data/1on1.hbs',
+                templateFile: 'src/scaffolding/templates/data/1on1.hbs',
                 pattern: /},(?!\n\s+{)/g,
                 path: 'data.js',
             },
@@ -172,11 +173,11 @@ module.exports = function (plop) {
             {
                 type: 'add',
                 path: 'notes/{{hyphenFormat subject}}.note',
-                templateFile: 'templates/note.hbs',
+                templateFile: 'src/scaffolding/templates/note.hbs',
             },
             {
                 type: 'append',
-                templateFile: 'templates/data/note.hbs',
+                templateFile: 'src/scaffolding/templates/data/note.hbs',
                 pattern: /},(?!\n\s+{)/g,
                 path: 'data.js',
             },
@@ -202,11 +203,11 @@ module.exports = function (plop) {
             {
                 type: 'add',
                 path: 'prepare/{{hyphenFormat event}}.prepare',
-                templateFile: 'templates/prepare.hbs',
+                templateFile: 'src/scaffolding/templates/prepare.hbs',
             },
             {
                 type: 'append',
-                templateFile: 'templates/data/prepare.hbs',
+                templateFile: 'src/scaffolding/templates/data/prepare.hbs',
                 pattern: /},(?!\n\s+{)/g,
                 path: 'data.js',
             },
@@ -226,11 +227,11 @@ module.exports = function (plop) {
             {
                 type: 'add',
                 path: 'logs/{{shortDate}}.log',
-                templateFile: 'templates/log.hbs',
+                templateFile: 'src/scaffolding/templates/log.hbs',
             },
             {
                 type: 'append',
-                templateFile: 'templates/data/log.hbs',
+                templateFile: 'src/scaffolding/templates/data/log.hbs',
                 pattern: /},(?!\n\s+{)/g,
                 path: 'data.js',
             },
@@ -256,7 +257,7 @@ module.exports = function (plop) {
             function customAction(answers) {
                 process.chdir(plop.getPlopfilePath());
                 let fileName = "todo/work.todo"
-                exec("echo "+answers.todo+" >> "+fileName);
+                exec("echo " + answers.todo + " >> " + fileName);
             },
         ]
     });
@@ -284,11 +285,11 @@ module.exports = function (plop) {
             {
                 type: 'add',
                 path: 'decisions/{{hyphenFormat dilemma}}.decision',
-                templateFile: 'templates/decision.hbs',
+                templateFile: 'src/scaffolding/templates/decision.hbs',
             },
             {
                 type: 'append',
-                templateFile: 'templates/data/decision.hbs',
+                templateFile: 'src/scaffolding/templates/data/decision.hbs',
                 pattern: /},(?!\n\s+{)/g,
                 path: 'data.js',
             },
@@ -312,7 +313,7 @@ module.exports = function (plop) {
         actions: [
             {
                 type: 'append',
-                templateFile: 'templates/data/deep-work-start.hbs',
+                templateFile: 'src/scaffolding/templates/data/deep-work-start.hbs',
                 pattern: /},(?!\n\s+{)/g,
                 path: 'data.js',
             },
@@ -325,12 +326,11 @@ module.exports = function (plop) {
     // ========================================= deep work end =======================================================
     plop.setGenerator('deepWorkEnd', {
         description: 'end a deep work session',
-        prompts: [
-        ],
+        prompts: [],
         actions: [
             {
                 type: 'append',
-                templateFile: 'templates/data/deep-work-end.hbs',
+                templateFile: 'src/scaffolding/templates/data/deep-work-end.hbs',
                 pattern: /},(?!\n\s+{)/g,
                 path: 'data.js',
             },

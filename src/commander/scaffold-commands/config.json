@@ -1,0 +1,11 @@
+{
+  "plan": {
+    "description": "Create a .plan"
+  },
+  "planTomorrow": {
+    "description": "Create tomorrow's .plan"
+  },
+  "meeting": {
+    "description": "Creating meeting notes"
+  }
+}

@@ -1,5 +1,6 @@
 import { Command } from 'commander';
-import { Scaffolder } from '../../scaffolder/Scaffolder';
+import { Scaffolding } from '../../scaffolding/Scaffolding';
+import { PlopScaffolding } from '../../scaffolding/PlopScaffolding';
 
 export class CreatePlanCommand extends Command {
 
@@ -13,7 +14,8 @@ export class CreatePlanCommand extends Command {
     }
 
     createPlan(): void {
-        Scaffolder.run(["plan"]);
+        let scaffolding:Scaffolding = new PlopScaffolding();
+        scaffolding.build(["plan"]);
     }
 
 

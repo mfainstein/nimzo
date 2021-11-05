@@ -1,5 +1,5 @@
 # ♟︎ Nimzo(witsch) ♟︎
-A minimalistic, distraction free, IDE focused system for the Engineering Manager.
+A minimalistic, distraction free, IDE focused system for the Software Engineer / Engineering Manager.
 
 * Stay in your IDE
 * Embrace deep work
@@ -22,5 +22,15 @@ Optional: git init... git set remote...
 ### Decision
 ### Log
 ### Manifest
+
+## Go Deep / Go Shallow
+Inspired by "Deep Work", going deep will close/block distracting apps & websites:<br>
+```nz deep```<br>
+When done, raise to the shallows by:<br>
+```nz shallow```
+
+## View/Browse
+```nz browse plans```
+
 
 
