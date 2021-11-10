@@ -7,5 +7,17 @@
   },
   "meeting": {
     "description": "Creating meeting notes"
+  },
+  "1on1": {
+    "description": "Create one on one meeting notes"
+  },
+  "prepare": {
+    "description": "Prepare for an event"
+  },
+  "note": {
+    "description": "Create a simple note"
+  },
+  "decision": {
+    "description": "Create a decision log, for future retrospective"
   }
 }

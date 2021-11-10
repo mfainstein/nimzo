@@ -1,16 +1,48 @@
-const {exec} = require('child_process');
-module.exports = function (plop) {
+import { exec } from 'child_process';
+
+import { NodePlopAPI } from 'plop';
+
+import { Configurator } from '../configurator/Configurator';
+
+import { ConfigKeys } from '../configurator/Config';
+
+import * as path from 'path';
+
+import fs from 'fs';
+import { OneOnOne } from './model/OneOnOne';
+
+//TODO: break into modules
+//TODO: path resolver, formatters, generators, etc.
+export default function plopFunction(plop: NodePlopAPI): void {
+    const templatePath: (itemName: string) => string = (itemName: string) => {
+        return `src/scaffolding/templates/${itemName}.hbs`;
+    };
+    const dataPath: (itemName: string) => string = (itemName: string) => {
+        return `src/scaffolding/templates/data/${itemName}.hbs`
+    };
+    const extension: (itemName:string) => string = (itemName:string) => {
+        return `${itemName}.md`
+    }
+
     // ========================================= Helpers =================================================================
-    plop.addHelper('projectPath', (p) => process.cwd());
-    plop.setHelper('dottedFormat', (text) => {
+    plop.addHelper('projectPath', () => {
+            let configurator = new Configurator();
+            let nimzoFile = path.join(process.cwd(), ".nimzo");
+            if (fs.existsSync(nimzoFile)) {
+                return process.cwd();
+            } else {
+                return configurator.get(ConfigKeys.PROJECT_PATH)
+            }
+        });
+    plop.setHelper('dottedFormat', (text: string) => {
         let parts = text.split(" ");
         return parts.join(".");
     });
-    plop.setHelper('hyphenFormat', (text) => {
+    plop.setHelper('hyphenFormat', (text: string) => {
         let parts = text.split(" ");
         return parts.join("-");
     });
-    plop.setHelper('parts', (text) => {
+    plop.setHelper('parts', (text: string) => {
         let parts = text.split(" ");
         return parts.length;
     });
@@ -76,8 +108,10 @@ module.exports = function (plop) {
                 process.chdir(plop.getPlopfilePath());
                 let format = plop.getHelper("hyphenFormat");
                 let shortDate = plop.getHelper("shortDate");
+                // @ts-ignore
                 let fileName = "meetings/" + format(answers.attendants) + "." + shortDate() + ".meeting"
                 exec("webstorm " + fileName);
+                return "";
             },
         ],
     });
@@ -102,6 +136,7 @@ module.exports = function (plop) {
                 let unixTime = plop.getHelper("unixTime");
                 let fileName = "plans/" + unixTime() + ".plan.md"
                 exec("webstorm " + fileName);
+                return "";
             },
         ],
     });
@@ -126,36 +161,39 @@ module.exports = function (plop) {
                 let tomorrowUnixTime = plop.getHelper("tomorrowUnixTime");
                 let fileName = "plans/" + tomorrowUnixTime() + ".plan.md"
                 exec("webstorm " + fileName);
+                return "";
             },
         ],
     });
     // ======================================== 1on1 ==================================================================
-    plop.setGenerator('1on1', {
-        description: '1on1 notes',
+    plop.setGenerator(OneOnOne.name, {
+        description: OneOnOne.description,
         prompts: [
             {
                 type: 'input',
-                name: 'associate',
+                name: OneOnOne.associate,
                 message: 'Names of associate:',
             }
         ],
         actions: [
             {
                 type: 'add',
-                path: '1on1/{{associate}}.{{shortDate}}.1on1',
-                templateFile: 'src/scaffolding/templates/1on1.hbs',
+                path: OneOnOne.bucket + '/{{associate}}.{{shortDate}}.'+extension(OneOnOne.name),
+                templateFile: templatePath(OneOnOne.name),
             },
             {
                 type: 'append',
-                templateFile: 'src/scaffolding/templates/data/1on1.hbs',
+                templateFile: dataPath(OneOnOne.name),
                 pattern: /},(?!\n\s+{)/g,
                 path: 'data.js',
             },
             function customAction(answers) {
                 process.chdir(plop.getPlopfilePath());
                 let shortDate = plop.getHelper("shortDate");
-                let fileName = "1on1/" + answers.associate + "." + shortDate() + ".1on1"
+                // @ts-ignore
+                let fileName = +OneOnOne.bucket+"/" + answers.associate + "." + shortDate() + "."+extension(OneOnOne.name)
                 exec("webstorm " + fileName);
+                return "";
             },
         ],
     });
@@ -184,8 +222,10 @@ module.exports = function (plop) {
             function customAction(answers) {
                 process.chdir(plop.getPlopfilePath());
                 let format = plop.getHelper("hyphenFormat");
+                // @ts-ignore
                 let fileName = "notes/" + format(answers.subject) + ".note"
                 exec("webstorm " + fileName);
+                return "";
             },
         ],
     });
@@ -214,8 +254,10 @@ module.exports = function (plop) {
             function customAction(answers) {
                 process.chdir(plop.getPlopfilePath());
                 let format = plop.getHelper("hyphenFormat");
+                // @ts-ignore
                 let fileName = "prepare/" + format(answers.event) + ".prepare";
                 exec("webstorm " + fileName);
+                return "";
             },
         ],
     });
@@ -240,6 +282,7 @@ module.exports = function (plop) {
                 let shortDate = plop.getHelper("shortDate");
                 let fileName = "logs/" + shortDate() + ".log"
                 exec("webstorm " + fileName);
+                return "";
             },
         ],
     });
@@ -257,7 +300,9 @@ module.exports = function (plop) {
             function customAction(answers) {
                 process.chdir(plop.getPlopfilePath());
                 let fileName = "todo/work.todo"
+                // @ts-ignore
                 exec("echo " + answers.todo + " >> " + fileName);
+                return "";
             },
         ]
     });
@@ -296,8 +341,10 @@ module.exports = function (plop) {
             function customAction(answers) {
                 process.chdir(plop.getPlopfilePath());
                 let format = plop.getHelper("hyphenFormat");
+                // @ts-ignore
                 let fileName = "decisions/" + format(answers.dilemma) + ".decision"
                 exec("webstorm " + fileName);
+                return "";
             },
         ],
     });
@@ -319,7 +366,8 @@ module.exports = function (plop) {
             },
             function customAction(answers) {
                 const {exec} = require('child_process');
-                exec("node scripts/focus-mode-turn-on.mjs")
+                exec("node scripts/focus-mode-turn-on.mjs");
+                return "";
             },
         ],
     });

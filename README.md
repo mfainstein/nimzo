@@ -8,14 +8,14 @@ A minimalistic, distraction free, IDE focused system for the Software Engineer /
 
 ## Quick start
 * ```npm install nimzo -g```
-* ```cd ~ && mkdir Personal```
-Optional: git init... git set remote...
+* ```cd ~/ && mkdir Personal```
+* [ Optional: git set remote... ]
 * ```nz init```
-* ```nz config```
 * ```nz open``` or Open ~/Personal in your favorite IDE.  
 
-## Scaffolding
+## Items Scaffolding
 ### Plan 
+### Note
 ### Prepare
 ### Meeting
 ### 1on1

@@ -10,6 +10,7 @@ export class ScaffoldCommand extends Command {
 
     constructor(private commandName:string, private commandDescription:string) {
         super();
+        this.init();
     }
 
     init(): void {
@@ -25,3 +26,4 @@ export class ScaffoldCommand extends Command {
         scaffolding.build([this.commandName]);
     }
 }
+

@@ -10,3 +10,9 @@ export const Config = {
         type: 'string'
     }
 }
+
+export enum ConfigKeys {
+    PROJECT_PATH = "projectPath",
+    EDITOR = "editor",
+    TEST = "test"
+}
