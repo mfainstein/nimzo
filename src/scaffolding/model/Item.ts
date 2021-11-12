@@ -1,8 +1,10 @@
-export interface Item {
-    name: string;
-    description: string;
-    shortDescription: string;
-    bucket: string;
-    [property: string]: string
+export class Item {
+    public static itemName: string;
+    public static description: string;
+    public static shortDescription: string;
+    public static bucket: string;
+
+    constructor(private created: Date) {
+    }
 }
 

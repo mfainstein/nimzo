@@ -10,6 +10,13 @@ import * as path from 'path';
 
 import fs from 'fs';
 import { OneOnOne } from './model/OneOnOne';
+import { Plan } from './model/Plan';
+import { Note } from './model/Note';
+import { Prepare } from './model/Prepare';
+import { Log } from './model/Log';
+import { Decision } from './model/Decision';
+import { Meeting } from './model/Meeting';
+import { PlanTomorrow } from './model/PlanTomorrow';
 
 //TODO: break into modules
 //TODO: path resolver, formatters, generators, etc.
@@ -20,20 +27,24 @@ export default function plopFunction(plop: NodePlopAPI): void {
     const dataPath: (itemName: string) => string = (itemName: string) => {
         return `src/scaffolding/templates/data/${itemName}.hbs`
     };
-    const extension: (itemName:string) => string = (itemName:string) => {
+    const extension: (itemName: string) => string = (itemName: string) => {
         return `${itemName}.md`
     }
 
     // ========================================= Helpers =================================================================
+    plop.addHelper("editorCommand", ()=>{
+        let configurator = new Configurator();
+        return configurator.get(ConfigKeys.EDITOR);
+    });
     plop.addHelper('projectPath', () => {
-            let configurator = new Configurator();
-            let nimzoFile = path.join(process.cwd(), ".nimzo");
-            if (fs.existsSync(nimzoFile)) {
-                return process.cwd();
-            } else {
-                return configurator.get(ConfigKeys.PROJECT_PATH)
-            }
-        });
+        let configurator = new Configurator();
+        let nimzoFile = path.join(process.cwd(), ".nimzo");
+        if (fs.existsSync(nimzoFile)) {
+            return process.cwd();
+        } else {
+            return configurator.get(ConfigKeys.PROJECT_PATH)
+        }
+    });
     plop.setHelper('dottedFormat', (text: string) => {
         let parts = text.split(" ");
         return parts.join(".");
@@ -78,29 +89,29 @@ export default function plopFunction(plop: NodePlopAPI): void {
         return day + "-" + month + "-" + year;
     })
     // ======================================= Meeting =================================================================
-    plop.setGenerator('meeting', {
-        description: 'Meeting notes',
+    plop.setGenerator(Meeting.itemName, {
+        description: Meeting.shortDescription,
         prompts: [
             {
                 type: 'input',
-                name: 'attendants',
-                message: 'Names of attendants:',
+                name: Meeting.attendantsField,
+                message: Meeting.attendantsFieldDescription,
             },
             {
                 type: 'input',
-                name: 'description',
-                message: 'Meeting description/agenda:',
+                name: Meeting.agendaField,
+                message: Meeting.attendantsFieldDescription,
             },
         ],
         actions: [
             {
                 type: 'add',
-                path: 'meetings/{{hyphenFormat attendants}}.{{shortDate}}.meeting',
-                templateFile: 'src/scaffolding/templates/meeting.hbs',
+                path: Meeting.bucket + '/{{hyphenFormat attendants}}.{{shortDate}}.' + extension(Meeting.itemName),
+                templateFile: templatePath(Meeting.itemName),
             },
             {
                 type: 'append',
-                templateFile: 'src/scaffolding/templates/data/meeting.hbs',
+                templateFile: dataPath(Meeting.itemName),
                 pattern: /},(?!\n\s+{)/g,
                 path: 'data.js',
             },
@@ -109,15 +120,15 @@ export default function plopFunction(plop: NodePlopAPI): void {
                 let format = plop.getHelper("hyphenFormat");
                 let shortDate = plop.getHelper("shortDate");
                 // @ts-ignore
-                let fileName = "meetings/" + format(answers.attendants) + "." + shortDate() + ".meeting"
-                exec("webstorm " + fileName);
+                let fileName = Meeting.bucket + "/" + format(answers.attendants) + "." + shortDate() + "." + extension(Meeting.itemName)
+                exec(plop.getHelper("editorCommand")()+"  "+ + fileName);
                 return "";
             },
         ],
     });
     // ======================================== Plan ===================================================================
-    plop.setGenerator('plan', {
-        description: 'Plan for the day (or the next day)',
+    plop.setGenerator(Plan.itemName, {
+        description: Plan.shortDescription,
         prompts: [],
         actions: [
             {
@@ -135,55 +146,56 @@ export default function plopFunction(plop: NodePlopAPI): void {
                 process.chdir(plop.getPlopfilePath());
                 let unixTime = plop.getHelper("unixTime");
                 let fileName = "plans/" + unixTime() + ".plan.md"
-                exec("webstorm " + fileName);
+                exec(plop.getHelper("editorCommand")()+"  "+ + fileName);
                 return "";
             },
         ],
     });
     // ======================================== Plan tomorrow ==========================================================
-    plop.setGenerator('planTomorrow', {
-        description: 'Plan for tomorrow',
+    // TODO: probably would like to support a general plan for a specific date
+    plop.setGenerator(PlanTomorrow.itemName, {
+        description: PlanTomorrow.shortDescription,
         prompts: [],
         actions: [
             {
                 type: 'add',
-                path: 'plans/{{tomorrowUnixTime}}.plan.md',
-                templateFile: 'src/scaffolding/templates/plan.hbs',
+                path: PlanTomorrow.bucket+'/{{tomorrowUnixTime}}.'+extension(PlanTomorrow.itemName),
+                templateFile: templatePath(PlanTomorrow.itemName),
             },
             {
                 type: 'append',
-                templateFile: 'src/scaffolding/templates/data/plan.hbs',
+                templateFile: dataPath(PlanTomorrow.itemName),
                 pattern: /},(?!\n\s+{)/g,
                 path: 'data.js',
             },
             function customAction(answers) {
                 process.chdir(plop.getPlopfilePath());
                 let tomorrowUnixTime = plop.getHelper("tomorrowUnixTime");
-                let fileName = "plans/" + tomorrowUnixTime() + ".plan.md"
-                exec("webstorm " + fileName);
+                let fileName = PlanTomorrow.bucket+"/" + tomorrowUnixTime() + "."+extension(PlanTomorrow.itemName)
+                exec(plop.getHelper("editorCommand")()+"  "+ + fileName);
                 return "";
             },
         ],
     });
     // ======================================== 1on1 ==================================================================
-    plop.setGenerator(OneOnOne.name, {
-        description: OneOnOne.description,
+    plop.setGenerator(OneOnOne.itemName, {
+        description: OneOnOne.shortDescription,
         prompts: [
             {
                 type: 'input',
-                name: OneOnOne.associate,
-                message: 'Names of associate:',
+                name: OneOnOne.associateField,
+                message: OneOnOne.associateFieldDescription,
             }
         ],
         actions: [
             {
                 type: 'add',
-                path: OneOnOne.bucket + '/{{associate}}.{{shortDate}}.'+extension(OneOnOne.name),
-                templateFile: templatePath(OneOnOne.name),
+                path: OneOnOne.bucket + '/{{' + OneOnOne.associateField + '}}.{{shortDate}}.' + extension(OneOnOne.itemName),
+                templateFile: templatePath(OneOnOne.itemName),
             },
             {
                 type: 'append',
-                templateFile: dataPath(OneOnOne.name),
+                templateFile: dataPath(OneOnOne.itemName),
                 pattern: /},(?!\n\s+{)/g,
                 path: 'data.js',
             },
@@ -191,31 +203,31 @@ export default function plopFunction(plop: NodePlopAPI): void {
                 process.chdir(plop.getPlopfilePath());
                 let shortDate = plop.getHelper("shortDate");
                 // @ts-ignore
-                let fileName = +OneOnOne.bucket+"/" + answers.associate + "." + shortDate() + "."+extension(OneOnOne.name)
-                exec("webstorm " + fileName);
+                let fileName = OneOnOne.bucket + "/" + answers.associate + "." + shortDate() + "." + extension(OneOnOne.itemName)
+                exec(plop.getHelper("editorCommand")()+"  "+ + fileName);
                 return "";
             },
         ],
     });
     // ======================================== note ==================================================================
-    plop.setGenerator('note', {
-        description: 'Just a note on any subject',
+    plop.setGenerator(Note.itemName, {
+        description: Note.shortDescription,
         prompts: [
             {
                 type: 'input',
-                name: 'subject',
-                message: 'Subject:',
+                name: Note.subjectField,
+                message: Note.subjectFieldDescription,
             },
         ],
         actions: [
             {
                 type: 'add',
-                path: 'notes/{{hyphenFormat subject}}.note',
-                templateFile: 'src/scaffolding/templates/note.hbs',
+                path: 'notes/{{hyphenFormat' + Note.subjectField + '}}.' + extension(Note.itemName),
+                templateFile: templatePath(Note.itemName),
             },
             {
                 type: 'append',
-                templateFile: 'src/scaffolding/templates/data/note.hbs',
+                templateFile: dataPath(Note.itemName),
                 pattern: /},(?!\n\s+{)/g,
                 path: 'data.js',
             },
@@ -223,31 +235,31 @@ export default function plopFunction(plop: NodePlopAPI): void {
                 process.chdir(plop.getPlopfilePath());
                 let format = plop.getHelper("hyphenFormat");
                 // @ts-ignore
-                let fileName = "notes/" + format(answers.subject) + ".note"
-                exec("webstorm " + fileName);
+                let fileName = "notes/" + format(answers.subject) + "." + Note.itemName
+                exec(plop.getHelper("editorCommand")()+"  "+ + fileName);
                 return "";
             },
         ],
     });
     // ======================================== prepare ================================================================
-    plop.setGenerator('prepare', {
-        description: 'Prepare for something specific',
+    plop.setGenerator(Prepare.itemName, {
+        description: Prepare.shortDescription,
         prompts: [
             {
                 type: 'input',
-                name: 'event',
-                message: 'Event to prepare to:',
+                name: Prepare.eventField,
+                message: Prepare.eventFieldDescription,
             },
         ],
         actions: [
             {
                 type: 'add',
-                path: 'prepare/{{hyphenFormat event}}.prepare',
-                templateFile: 'src/scaffolding/templates/prepare.hbs',
+                path: Prepare.bucket + '/{{hyphenFormat event}}.' + extension(Prepare.itemName),
+                templateFile: templatePath(Prepare.itemName),
             },
             {
                 type: 'append',
-                templateFile: 'src/scaffolding/templates/data/prepare.hbs',
+                templateFile: dataPath(Prepare.itemName),
                 pattern: /},(?!\n\s+{)/g,
                 path: 'data.js',
             },
@@ -255,33 +267,33 @@ export default function plopFunction(plop: NodePlopAPI): void {
                 process.chdir(plop.getPlopfilePath());
                 let format = plop.getHelper("hyphenFormat");
                 // @ts-ignore
-                let fileName = "prepare/" + format(answers.event) + ".prepare";
-                exec("webstorm " + fileName);
+                let fileName = Prepare.bucket + "/" + format(answers.event) + "." + extension(Prepare.itemName);
+                exec(plop.getHelper("editorCommand")()+"  "+ + fileName);
                 return "";
             },
         ],
     });
     // ======================================== log ====================================================================
-    plop.setGenerator('log', {
-        description: 'Log to track the day...',
+    plop.setGenerator(Log.itemName, {
+        description: Log.shortDescription,
         prompts: [],
         actions: [
             {
                 type: 'add',
-                path: 'logs/{{shortDate}}.log',
-                templateFile: 'src/scaffolding/templates/log.hbs',
+                path: Log.bucket + '/{{shortDate}}.' + extension(Log.itemName),
+                templateFile: templatePath(Log.itemName),
             },
             {
                 type: 'append',
-                templateFile: 'src/scaffolding/templates/data/log.hbs',
+                templateFile: dataPath(Log.itemName),
                 pattern: /},(?!\n\s+{)/g,
                 path: 'data.js',
             },
             function customAction(answers) {
                 process.chdir(plop.getPlopfilePath());
                 let shortDate = plop.getHelper("shortDate");
-                let fileName = "logs/" + shortDate() + ".log"
-                exec("webstorm " + fileName);
+                let fileName = Log.bucket + "/" + shortDate() + "." + extension(Log.itemName)
+                exec(plop.getHelper("editorCommand")()+"  "+ + fileName);
                 return "";
             },
         ],
@@ -307,34 +319,34 @@ export default function plopFunction(plop: NodePlopAPI): void {
         ]
     });
     // ======================================== decision ===============================================================
-    plop.setGenerator('decision', {
-        description: 'log a decision',
+    plop.setGenerator(Decision.itemName, {
+        description: Decision.shortDescription,
         prompts: [
             {
                 type: 'input',
-                name: 'dilemma',
-                message: 'The dilemma:',
+                name: Decision.dilemmaField,
+                message: Decision.dilemmaFieldDescription,
             },
             {
                 type: 'input',
-                name: 'decision',
-                message: 'The decision:',
+                name: Decision.decisionField,
+                message: Decision.decisionFieldDescription,
             },
             {
                 type: 'input',
-                name: 'shared',
-                message: 'Shared with:',
+                name: Decision.sharedFiled,
+                message: Decision.sharedFieldDDescription,
             },
         ],
         actions: [
             {
                 type: 'add',
-                path: 'decisions/{{hyphenFormat dilemma}}.decision',
-                templateFile: 'src/scaffolding/templates/decision.hbs',
+                path: Decision.bucket + '/{{hyphenFormat dilemma}}.' + extension(Decision.itemName),
+                templateFile: templatePath(Decision.itemName),
             },
             {
                 type: 'append',
-                templateFile: 'src/scaffolding/templates/data/decision.hbs',
+                templateFile: dataPath(Decision.itemName),
                 pattern: /},(?!\n\s+{)/g,
                 path: 'data.js',
             },
@@ -342,8 +354,8 @@ export default function plopFunction(plop: NodePlopAPI): void {
                 process.chdir(plop.getPlopfilePath());
                 let format = plop.getHelper("hyphenFormat");
                 // @ts-ignore
-                let fileName = "decisions/" + format(answers.dilemma) + ".decision"
-                exec("webstorm " + fileName);
+                let fileName = Decision.bucket + "/" + format(answers.dilemma) + "." + extension(Decision.itemName)
+                exec(plop.getHelper("editorCommand")()+"  "+ + fileName);
                 return "";
             },
         ],
