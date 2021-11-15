@@ -6,5 +6,10 @@ export class Item {
 
     constructor(private created: Date) {
     }
+
+    uniqueness():string {
+        return (new Date().getTime().toString())
+    }
+
 }
 

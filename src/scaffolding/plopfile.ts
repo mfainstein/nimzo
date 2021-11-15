@@ -17,26 +17,27 @@ import { Log } from './model/Log';
 import { Decision } from './model/Decision';
 import { Meeting } from './model/Meeting';
 import { PlanTomorrow } from './model/PlanTomorrow';
+import { Git } from '../persistence/Git';
 
 //TODO: break into modules
 //TODO: path resolver, formatters, generators, etc.
 export default function plopFunction(plop: NodePlopAPI): void {
     const templatePath: (itemName: string) => string = (itemName: string) => {
-        return `src/scaffolding/templates/${itemName}.hbs`;
+        return `templates/${itemName}.hbs`;
     };
     const dataPath: (itemName: string) => string = (itemName: string) => {
-        return `src/scaffolding/templates/data/${itemName}.hbs`
+        return `templates/data/${itemName}.hbs`
     };
     const extension: (itemName: string) => string = (itemName: string) => {
         return `${itemName}.md`
     }
 
     // ========================================= Helpers =================================================================
-    plop.addHelper("editorCommand", ()=>{
+    plop.setHelper("editorCommand", () => {
         let configurator = new Configurator();
         return configurator.get(ConfigKeys.EDITOR);
     });
-    plop.addHelper('projectPath', () => {
+    plop.setHelper('projectPath', () => {
         let configurator = new Configurator();
         let nimzoFile = path.join(process.cwd(), ".nimzo");
         if (fs.existsSync(nimzoFile)) {
@@ -70,6 +71,9 @@ export default function plopFunction(plop: NodePlopAPI): void {
         date.setMilliseconds(0);
         return date.getTime();
     });
+    /**
+     * TODO: should be maybe dayDate?
+     */
     plop.setHelper('shortDate', () => {
         let dateObj = new Date();
         let month = dateObj.getUTCMonth() + 1; //months from 1-12
@@ -100,7 +104,7 @@ export default function plopFunction(plop: NodePlopAPI): void {
             {
                 type: 'input',
                 name: Meeting.agendaField,
-                message: Meeting.attendantsFieldDescription,
+                message: Meeting.agendaFieldDescription,
             },
         ],
         actions: [
@@ -121,7 +125,7 @@ export default function plopFunction(plop: NodePlopAPI): void {
                 let shortDate = plop.getHelper("shortDate");
                 // @ts-ignore
                 let fileName = Meeting.bucket + "/" + format(answers.attendants) + "." + shortDate() + "." + extension(Meeting.itemName)
-                exec(plop.getHelper("editorCommand")()+"  "+ + fileName);
+                exec(plop.getHelper("editorCommand")() + "  " + +fileName);
                 return "";
             },
         ],
@@ -133,20 +137,21 @@ export default function plopFunction(plop: NodePlopAPI): void {
         actions: [
             {
                 type: 'add',
-                path: 'plans/{{unixTime}}.plan.md',
-                templateFile: 'src/scaffolding/templates/plan.hbs',
+                path: '{{projectPath}}/' + Plan.bucket + '/{{shortDate}}.' + extension(Plan.itemName),
+                templateFile: templatePath(Plan.itemName),
             },
             {
                 type: 'append',
-                templateFile: 'src/scaffolding/templates/data/plan.hbs',
+                templateFile: dataPath(Plan.itemName),
                 pattern: /},(?!\n\s+{)/g,
-                path: 'data.js',
+                path: '{{projectPath}}/data.js',
             },
             function customAction(answers) {
-                process.chdir(plop.getPlopfilePath());
-                let unixTime = plop.getHelper("unixTime");
-                let fileName = "plans/" + unixTime() + ".plan.md"
-                exec(plop.getHelper("editorCommand")()+"  "+ + fileName);
+                let shortDate = plop.getHelper("shortDate");
+                let projectPath = plop.getHelper("projectPath");
+                let fileName = projectPath() + "/" + Plan.bucket + "/" + shortDate() + "." + extension(Plan.itemName)
+                console.log(fileName);
+                exec(plop.getHelper("editorCommand")() + " " + fileName);
                 return "";
             },
         ],
@@ -159,7 +164,7 @@ export default function plopFunction(plop: NodePlopAPI): void {
         actions: [
             {
                 type: 'add',
-                path: PlanTomorrow.bucket+'/{{tomorrowUnixTime}}.'+extension(PlanTomorrow.itemName),
+                path: PlanTomorrow.bucket + '/{{tomorrowUnixTime}}.' + extension(PlanTomorrow.itemName),
                 templateFile: templatePath(PlanTomorrow.itemName),
             },
             {
@@ -171,8 +176,8 @@ export default function plopFunction(plop: NodePlopAPI): void {
             function customAction(answers) {
                 process.chdir(plop.getPlopfilePath());
                 let tomorrowUnixTime = plop.getHelper("tomorrowUnixTime");
-                let fileName = PlanTomorrow.bucket+"/" + tomorrowUnixTime() + "."+extension(PlanTomorrow.itemName)
-                exec(plop.getHelper("editorCommand")()+"  "+ + fileName);
+                let fileName = PlanTomorrow.bucket + "/" + tomorrowUnixTime() + "." + extension(PlanTomorrow.itemName)
+                exec(plop.getHelper("editorCommand")() + "  " + +fileName);
                 return "";
             },
         ],
@@ -190,23 +195,31 @@ export default function plopFunction(plop: NodePlopAPI): void {
         actions: [
             {
                 type: 'add',
-                path: OneOnOne.bucket + '/{{' + OneOnOne.associateField + '}}.{{shortDate}}.' + extension(OneOnOne.itemName),
+                path: '{{projectPath}}/' + OneOnOne.bucket + '/{{' + OneOnOne.associateField + '}}.{{shortDate}}.' + extension(OneOnOne.itemName),
                 templateFile: templatePath(OneOnOne.itemName),
             },
             {
                 type: 'append',
                 templateFile: dataPath(OneOnOne.itemName),
                 pattern: /},(?!\n\s+{)/g,
-                path: 'data.js',
+                path: '{{projectPath}}/data.js',
             },
             function customAction(answers) {
                 process.chdir(plop.getPlopfilePath());
                 let shortDate = plop.getHelper("shortDate");
+                let projectPath = plop.getHelper("projectPath");
                 // @ts-ignore
-                let fileName = OneOnOne.bucket + "/" + answers.associate + "." + shortDate() + "." + extension(OneOnOne.itemName)
-                exec(plop.getHelper("editorCommand")()+"  "+ + fileName);
-                return "";
+                let fileName = projectPath() + "/" + OneOnOne.bucket + "/" + answers.associate + "." + shortDate() + "." + extension(OneOnOne.itemName)
+                console.log(fileName);
+                exec(plop.getHelper("editorCommand")() + " "+fileName);
+                return "Created 1on1 item";
             },
+            function persist(answers) {
+                let git = new Git();
+                git.load();
+                git.save(OneOnOne.itemName)
+                return "All Saved";
+            }
         ],
     });
     // ======================================== note ==================================================================
@@ -236,7 +249,7 @@ export default function plopFunction(plop: NodePlopAPI): void {
                 let format = plop.getHelper("hyphenFormat");
                 // @ts-ignore
                 let fileName = "notes/" + format(answers.subject) + "." + Note.itemName
-                exec(plop.getHelper("editorCommand")()+"  "+ + fileName);
+                exec(plop.getHelper("editorCommand")() + "  " + +fileName);
                 return "";
             },
         ],
@@ -268,7 +281,7 @@ export default function plopFunction(plop: NodePlopAPI): void {
                 let format = plop.getHelper("hyphenFormat");
                 // @ts-ignore
                 let fileName = Prepare.bucket + "/" + format(answers.event) + "." + extension(Prepare.itemName);
-                exec(plop.getHelper("editorCommand")()+"  "+ + fileName);
+                exec(plop.getHelper("editorCommand")() + "  " + +fileName);
                 return "";
             },
         ],
@@ -293,7 +306,7 @@ export default function plopFunction(plop: NodePlopAPI): void {
                 process.chdir(plop.getPlopfilePath());
                 let shortDate = plop.getHelper("shortDate");
                 let fileName = Log.bucket + "/" + shortDate() + "." + extension(Log.itemName)
-                exec(plop.getHelper("editorCommand")()+"  "+ + fileName);
+                exec(plop.getHelper("editorCommand")() + "  " + +fileName);
                 return "";
             },
         ],
@@ -355,7 +368,7 @@ export default function plopFunction(plop: NodePlopAPI): void {
                 let format = plop.getHelper("hyphenFormat");
                 // @ts-ignore
                 let fileName = Decision.bucket + "/" + format(answers.dilemma) + "." + extension(Decision.itemName)
-                exec(plop.getHelper("editorCommand")()+"  "+ + fileName);
+                exec(plop.getHelper("editorCommand")() + "  " + +fileName);
                 return "";
             },
         ],

@@ -9,7 +9,6 @@ import { Scaffolding } from './Scaffolding';
 export class PlopScaffolding implements Scaffolding {
     public build(args: string[]): void {
         const argv = require('minimist')(args);
-        console.log(path.join(__dirname, '../../dist/scaffolding/plopfile.js'));
         Plop.launch({
             // In order for `plop` to always pick up the `plopfile.js` despite the CWD, you must use `__dirname`
             configPath: path.join(__dirname, '../../dist/scaffolding/plopfile.js'),

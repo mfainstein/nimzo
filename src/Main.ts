@@ -2,17 +2,16 @@
 import { NimzoCommander } from './commander/NimzoCommander';
 import { Command } from 'commander';
 import { InitCommand } from './commander/commands/InitCommand';
-import scaffoldingConfig from "./commander/scaffold-commands/config.json"
 import { ScaffoldCommand } from './commander/scaffold-commands/ScaffoldCommand';
+import { Items } from './scaffolding/model/Items';
+import { PersistCommand } from './commander/commands/PersistCommand';
 let nimzoCommander:Command = new NimzoCommander();
 
 nimzoCommander.addCommand(new InitCommand());
-Object.keys(scaffoldingConfig).forEach((commandName)=>{
-    // TODO: fix this ts-ignore with proper typing of the json
-    // @ts-ignore
-    let description = scaffoldingConfig[commandName].description;
-    nimzoCommander.addCommand(new ScaffoldCommand(commandName, description));
+Items.map.forEach((item:any, itemName:string)=>{
+    let description = item.shortDescription;
+    nimzoCommander.addCommand(new ScaffoldCommand(itemName, description))
 })
-
+nimzoCommander.addCommand(new PersistCommand());
 nimzoCommander.parse();
 
